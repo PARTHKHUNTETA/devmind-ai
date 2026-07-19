@@ -26,6 +26,11 @@ The model can look up live information when needed, stream tool progress and the
 - Loading states, toasts, and graceful tool/chat errors
 - Responsive shell with collapsible sidebar
 
+### Phase write-ups
+
+- [Phase 1 — Web Search](./docs/PHASE1-WEB-SEARCH.md)
+- [Phase 2 — Chat Branching](./docs/PHASE2-CHAT-BRANCHING.md)
+
 ## Tech stack
 
 | Layer | Choice |
@@ -138,29 +143,7 @@ Recommended: [Vercel](https://vercel.com) + hosted Postgres (e.g. Neon) + Clerk 
 5. Set the Vercel Node.js version to **22.x** (Project Settings → General → Node.js Version). This repo requires Node `>=22`.
 6. Add the production URL to Clerk allowed origins / redirect URLs.
 
-**Live demo:** _add your deployment URL here_  
-**Demo video:** _add your Loom / YouTube / Drive link here_
+**Live demo:** _devmind-ai-ashy.vercel.app_  
 
-## Submission checklist
 
-Use this before turning in the assignment:
 
-- [ ] GitHub repository is **public**
-- [ ] All feature work is **committed and pushed** (including local branching UI fixes)
-- [ ] App is **deployed**; README links the live URL
-- [ ] **Demo video** recorded and linked in this README
-- [ ] README documents setup, env vars, and features (this file)
-- [ ] `.env.example` is present; no real secrets in git
-- [ ] Smoke-test: web search streams + persists; create / switch / rename / delete branches
-
-### Demo video suggested script (2–3 min)
-
-1. Ask a current-events question → show search loading, sources, then answer.
-2. Reload the chat → show the search block still present (persistence).
-3. Branch from a mid-thread message → ask a different follow-up.
-4. Switch back to Main → show independent histories.
-5. Rename a branch; delete a non-Main branch.
-
-## License
-
-Private coursework project unless otherwise noted.
