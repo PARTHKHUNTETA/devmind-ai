@@ -78,11 +78,25 @@ export async function listConversations(): Promise<ConversationListItem[]> {
 export async function createConversation(title = "New Chat") {
     const user = await requireUser();
 
-    return prisma.conversation.create({
-        data: {
-            userId: user.id,
-            title: title.trim() || "New Chat",
-        },
+    return prisma.$transaction(async (tx) => {
+        const created = await tx.conversation.create({
+            data: {
+                userId: user.id,
+                title: title.trim() || "New Chat",
+            },
+        });
+
+        const mainBranch = await tx.conversationBranch.create({
+            data: {
+                conversationId: created.id,
+                name: "Main",
+            },
+        });
+
+        return tx.conversation.update({
+            where: { id: created.id },
+            data: { activeBranchId: mainBranch.id },
+        });
     });
 }
 

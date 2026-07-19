@@ -68,15 +68,45 @@ export async function listMessages(
     if (!trimmed) {
       throw new Error("Message cannot be empty");
     }
+
+    const branch = await prisma.conversationBranch.findFirst({
+      where: {
+        id: conversation.activeBranchId ?? undefined,
+        conversationId,
+      },
+    }) ?? await prisma.conversationBranch.findFirst({
+      where: { conversationId },
+      orderBy: { createdAt: "asc" },
+    });
   
     const message = await prisma.message.create({
       data: {
         conversationId,
+        parentId: branch?.headMessageId ?? null,
         role: "USER",
         status: "COMPLETE",
         content: trimmed,
       },
     });
+
+    if (branch) {
+      await prisma.conversationBranch.update({
+        where: { id: branch.id },
+        data: {
+          headMessageId: message.id,
+          ...(branch.forkFromMessageId
+            ? {}
+            : { forkFromMessageId: message.id }),
+        },
+      });
+
+      if (!conversation.activeBranchId) {
+        await prisma.conversation.update({
+          where: { id: conversationId },
+          data: { activeBranchId: branch.id },
+        });
+      }
+    }
   
     const shouldRename =
       conversation.title === "New Chat" || conversation.title.trim() === "";

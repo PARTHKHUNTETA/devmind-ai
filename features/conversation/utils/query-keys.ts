@@ -8,5 +8,9 @@ export const queryKeys = {
       byConversation: (conversationId: string) =>
         ["messages", conversationId] as const,
     },
+    branches: {
+      byConversation: (conversationId: string) =>
+        ["branches", conversationId] as const,
+    },
   };
   

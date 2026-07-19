@@ -14,12 +14,12 @@ datasource db {
 
 
 model User {
-  id String @id @default(uuid())
-  clerkId String @unique
-  email String? @unique
+  id        String  @id @default(uuid())
+  clerkId   String  @unique
+  email     String? @unique
   firstname String?
-  lastname String?
-  imageUrl String?
+  lastname  String?
+  imageUrl  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -27,20 +27,22 @@ model User {
 }
 
 model Conversation {
-  id            String   @id @default(cuid())
-  userId        String
-  title         String   @default("New Chat")
-  model         String? // e.g. openai/gpt-4.1 — per-thread model override
-  systemPrompt  String?  @db.Text
-  isPinned      Boolean  @default(false)
-  isArchived    Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  lastMessageAt DateTime @default(now())
+  id             String   @id @default(cuid())
+  userId         String
+  title          String   @default("New Chat")
+  model          String? // e.g. openai/gpt-4.1 — per-thread model override
+  systemPrompt   String?  @db.Text
+  isPinned       Boolean  @default(false)
+  isArchived     Boolean  @default(false)
+  activeBranchId String?  @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  lastMessageAt  DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  messages Message[]
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeBranch ConversationBranch?  @relation("ActiveBranch", fields: [activeBranchId], references: [id], onDelete: SetNull)
+  messages     Message[]
+  branches     ConversationBranch[] @relation("ConversationBranches")
 
   @@index([userId, lastMessageAt(sort: Desc)])
   @@index([userId, isPinned, lastMessageAt(sort: Desc)])
@@ -59,21 +61,42 @@ enum MessageStatus {
   ERROR
 }
 
+model ConversationBranch {
+  id                String   @id @default(cuid())
+  conversationId    String
+  name              String   @default("Main")
+  forkFromMessageId String?
+  headMessageId     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  conversation    Conversation  @relation("ConversationBranches", fields: [conversationId], references: [id], onDelete: Cascade)
+  activeFor       Conversation? @relation("ActiveBranch")
+  forkFromMessage Message?      @relation("BranchFork", fields: [forkFromMessageId], references: [id], onDelete: SetNull)
+  headMessage     Message?      @relation("BranchHead", fields: [headMessageId], references: [id], onDelete: SetNull)
+
+  @@index([conversationId])
+}
 
 model Message {
-  id   String @id @default(cuid())
+  id             String        @id @default(cuid())
   conversationId String
-  role MessageRole
-   status         MessageStatus @default(COMPLETE)
-   content        String @db.Text
-   parts          Json?  // 
-   metadata       Json? 
+  parentId       String?
+  role           MessageRole
+  status         MessageStatus @default(COMPLETE)
+  content        String        @db.Text
+  parts          Json?
+  metadata       Json?
 
-   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversation   Conversation         @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  parent         Message?             @relation("MessageTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children       Message[]            @relation("MessageTree")
+  forkedBranches ConversationBranch[] @relation("BranchFork")
+  headOfBranches ConversationBranch[] @relation("BranchHead")
 
-   createdAt DateTime @default(now())
-   updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-   @@index([conversationId, createdAt(sort: Desc)])
-   
+  @@index([conversationId, createdAt(sort: Desc)])
+  @@index([parentId])
 }

@@ -1,4 +1,7 @@
-import { loadChatMessages } from '@/features/ai/actions/chat-store';
+import {
+  getActiveBranch,
+  loadChatMessages,
+} from '@/features/ai/actions/chat-store';
 import { getConversation } from '@/features/conversation/actions/conversation-actions';
 import { ConversationView } from '@/features/conversation/components/conversation-view';
 import { notFound } from 'next/navigation';
@@ -9,24 +12,25 @@ type ConversationPageProps = {
   };
 
 /**
- * Conversation page — loads messages and renders the chat UI for a given ID.
+ * Conversation page — loads the active branch path and renders the chat UI.
  */
 const page = async({params}:ConversationPageProps) => {
     const {id} = await params;
 
     try {
       await getConversation(id)
-    } catch (error) {
+    } catch {
       notFound()
     }
 
-    const initialMessages = await loadChatMessages(id);
-    
+    const activeBranch = await getActiveBranch(id);
+    const initialMessages = await loadChatMessages(id, activeBranch.id);
 
   return (
     <ConversationView
-      key={id}
+      key={`${id}:${activeBranch.id}`}
       conversationId={id}
+      activeBranchId={activeBranch.id}
       initialMessages={initialMessages}
     />
   )

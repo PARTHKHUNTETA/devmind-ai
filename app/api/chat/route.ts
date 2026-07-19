@@ -1,4 +1,8 @@
-import { loadChatMessages, saveChatMessages } from "@/features/ai/actions/chat-store";
+import {
+    getActiveBranch,
+    loadChatMessages,
+    saveChatMessages,
+} from "@/features/ai/actions/chat-store";
 import { webSearchTools } from "@/features/ai/tools/web-search";
 import { getChatModel } from "@/features/ai/utils/model";
 import { requireUser } from "@/features/auth/action/require-user";
@@ -25,8 +29,8 @@ const DEFAULT_SYSTEM_PROMPT =
 /**
  * POST /api/chat — Streams an AI assistant reply for a conversation.
  *
- * Validates auth and ownership, persists the user message, then streams the
- * assistant response via the AI SDK (including optional web search tool calls).
+ * Validates auth and ownership, persists the user message on the active branch,
+ * then streams the assistant response via the AI SDK (including optional web search).
  * Final messages — including tool parts — are saved when the stream ends.
  */
 export async function POST(req: Request) {
@@ -51,7 +55,8 @@ export async function POST(req: Request) {
         return new Response("Conversation not found", { status: 404 });
     }
 
-    const previousMessages = await loadChatMessages(id);
+    const activeBranch = await getActiveBranch(id);
+    const previousMessages = await loadChatMessages(id, activeBranch.id);
 
     const alreadySaved = previousMessages.some(
         (storedMessage) => storedMessage.id === message.id
@@ -60,7 +65,10 @@ export async function POST(req: Request) {
     const messages = alreadySaved ? previousMessages : [...previousMessages, message];
 
     if (!alreadySaved) {
-        await saveChatMessages(id, [message]);
+        await saveChatMessages(id, [message], {
+            parentId: activeBranch.headMessageId,
+            branchId: activeBranch.id,
+        });
     }
 
     const result = streamText({
@@ -94,7 +102,12 @@ export async function POST(req: Request) {
             },
             onEnd: async ({ messages: finalMessages }) => {
                 try {
-                    await saveChatMessages(id, finalMessages, { updateTitle: false });
+                    // Existing rows keep their parentId; new assistant rows chain from
+                    // the prior message while walking the batch. Branch head advances.
+                    await saveChatMessages(id, finalMessages, {
+                        updateTitle: false,
+                        branchId: activeBranch.id,
+                    });
                 } catch (error) {
                     console.error(error);
                 }

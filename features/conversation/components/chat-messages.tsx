@@ -7,6 +7,7 @@ import {
   type ChatStatus,
   type UIMessage,
 } from "ai";
+import { GitBranchIcon } from "lucide-react";
 
 import {
   Conversation,
@@ -14,13 +15,17 @@ import {
 } from "@/components/ai-elements/conversation";
 import {
   Message,
+  MessageAction,
+  MessageActions,
   MessageContent,
   MessageResponse,
 } from "@/components/ai-elements/message";
 import { Loader } from "@/components/ai-elements/loader";
+import { useCreateBranch } from "@/features/conversation/hooks/use-branches";
 import { WebSearchPart } from "./web-search-part";
 
 type ChatMessagesProps = {
+  conversationId: string;
   messages: UIMessage[];
   status: ChatStatus;
 };
@@ -28,7 +33,12 @@ type ChatMessagesProps = {
 /**
  * Renders the conversation message list with markdown, tool parts, and loading.
  */
-export function ChatMessages({ messages, status }: ChatMessagesProps) {
+export function ChatMessages({
+  conversationId,
+  messages,
+  status,
+}: ChatMessagesProps) {
+  const createBranch = useCreateBranch(conversationId);
   const isWaiting =
     status === "submitted" && messages.at(-1)?.role === "user";
 
@@ -60,6 +70,18 @@ export function ChatMessages({ messages, status }: ChatMessagesProps) {
                 return null;
               })}
             </MessageContent>
+            <MessageActions className="opacity-0 transition-opacity group-hover:opacity-100">
+              <MessageAction
+                tooltip="Branch from here"
+                label="Branch from here"
+                disabled={createBranch.isPending || status !== "ready"}
+                onClick={() => {
+                  createBranch.mutate({ messageId: message.id });
+                }}
+              >
+                <GitBranchIcon className="size-3.5" />
+              </MessageAction>
+            </MessageActions>
           </Message>
         ))}
 

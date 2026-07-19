@@ -8,19 +8,25 @@ import React, { useMemo } from 'react'
 import { useConversations } from '../hooks/use-conversation';
 import { queryKeys } from '../utils/query-keys';
 import { toast } from 'sonner';
+import { BranchSwitcher } from './branch-switcher';
 import { ChatEmpty } from './chat-empty';
 import { ChatMessages } from './chat-messages';
 import { ChatComposer } from './chat-composer';
 
 type ConversationViewProps = {
     conversationId: string;
+    activeBranchId: string | null;
     initialMessages: UIMessage[];
 };
 
 /**
  * Main chat view — header, message list (or empty state), and composer with streaming.
  */
-export const ConversationView = ({ conversationId, initialMessages }: ConversationViewProps) => {
+export const ConversationView = ({
+    conversationId,
+    activeBranchId,
+    initialMessages,
+}: ConversationViewProps) => {
 
     const queryClient = useQueryClient();
     const { data: conversations } = useConversations();
@@ -29,18 +35,27 @@ export const ConversationView = ({ conversationId, initialMessages }: Conversati
         api: "/api/chat",
         prepareSendMessagesRequest: ({ id, messages }) => ({
             body: {
-                id, message: messages.at(-1)
+                // Transport id may be conversation:branch — API expects conversation id.
+                id: conversationId,
+                message: messages.at(-1)
             }
         })
-    }), []);
+    }), [conversationId]);
+
+    const chatId = activeBranchId
+        ? `${conversationId}:${activeBranchId}`
+        : conversationId;
 
     const { messages, sendMessage, status } = useChat({
-        id: conversationId,
+        id: chatId,
         messages: initialMessages,
         transport,
         onFinish: () => {
             void queryClient.invalidateQueries({
                 queryKey: queryKeys.conversations.all,
+            });
+            void queryClient.invalidateQueries({
+                queryKey: queryKeys.branches.byConversation(conversationId),
             });
         },
         onError: (error) => {
@@ -55,13 +70,21 @@ export const ConversationView = ({ conversationId, initialMessages }: Conversati
             <header className="flex h-14 shrink-0 items-center gap-2 border-b px-3">
                 <SidebarTrigger />
                 <Separator orientation="vertical" className="mx-1 h-4" />
-                <h1 className="truncate text-sm font-medium">{title}</h1>
+                <h1 className="min-w-0 flex-1 truncate text-sm font-medium">{title}</h1>
+                <BranchSwitcher
+                    conversationId={conversationId}
+                    activeBranchId={activeBranchId}
+                />
             </header>
 
             {messages.length === 0 ? (
                 <ChatEmpty />
             ) : (
-                <ChatMessages messages={messages} status={status} />
+                <ChatMessages
+                    conversationId={conversationId}
+                    messages={messages}
+                    status={status}
+                />
             )}
 
             <ChatComposer
