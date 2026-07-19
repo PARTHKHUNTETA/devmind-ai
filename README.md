@@ -134,8 +134,9 @@ Recommended: [Vercel](https://vercel.com) + hosted Postgres (e.g. Neon) + Clerk 
 1. Push this repo to GitHub (public for submission).
 2. Import the project in Vercel.
 3. Set the same env vars as `.env.example` in the Vercel project settings.
-4. Ensure `prisma migrate deploy` runs on build (or run migrations against production once).
-5. Add the production URL to Clerk allowed origins / redirect URLs.
+4. Migrations run automatically on build (`prisma migrate deploy` in the `build` script).
+5. Set the Vercel Node.js version to **22.x** (Project Settings → General → Node.js Version). This repo requires Node `>=22`.
+6. Add the production URL to Clerk allowed origins / redirect URLs.
 
 **Live demo:** _add your deployment URL here_  
 **Demo video:** _add your Loom / YouTube / Drive link here_
