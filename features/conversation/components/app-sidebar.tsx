@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -227,6 +228,11 @@ function ChatItem({
 /** Footer menu with theme toggle and Clerk user account button. */
 function SidebarFooterMenu() {
   const { resolvedTheme, setTheme } = useTheme();
+  const [userButtonReady, setUserButtonReady] = useState(false);
+
+  useEffect(() => {
+    setUserButtonReady(true);
+  }, []);
 
   return (
     <SidebarMenu>
@@ -243,13 +249,19 @@ function SidebarFooterMenu() {
       </SidebarMenuItem>
       <SidebarMenuItem>
         <div className="flex items-center gap-2 px-1 py-1.5">
-          <UserButton
-            appearance={{
-              elements: {
-                avatarBox: "size-8",
-              },
-            }}
-          />
+          <div className="size-8 shrink-0">
+            {userButtonReady ? (
+              <UserButton
+                appearance={{
+                  elements: {
+                    avatarBox: "size-8",
+                  },
+                }}
+              />
+            ) : (
+              <Skeleton className="size-8 rounded-full" />
+            )}
+          </div>
           <span className="truncate text-sm text-muted-foreground group-data-[collapsible=icon]:hidden">
             Account
           </span>

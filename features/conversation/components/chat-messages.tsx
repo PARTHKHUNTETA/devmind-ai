@@ -21,24 +21,24 @@ import {
   MessageResponse,
 } from "@/components/ai-elements/message";
 import { Loader } from "@/components/ai-elements/loader";
-import { useCreateBranch } from "@/features/conversation/hooks/use-branches";
 import { WebSearchPart } from "./web-search-part";
 
 type ChatMessagesProps = {
-  conversationId: string;
   messages: UIMessage[];
   status: ChatStatus;
+  branchDisabled?: boolean;
+  onBranchFromMessage: (messageId: string) => void;
 };
 
 /**
  * Renders the conversation message list with markdown, tool parts, and loading.
  */
 export function ChatMessages({
-  conversationId,
   messages,
   status,
+  branchDisabled = false,
+  onBranchFromMessage,
 }: ChatMessagesProps) {
-  const createBranch = useCreateBranch(conversationId);
   const isWaiting =
     status === "submitted" && messages.at(-1)?.role === "user";
 
@@ -74,9 +74,9 @@ export function ChatMessages({
               <MessageAction
                 tooltip="Branch from here"
                 label="Branch from here"
-                disabled={createBranch.isPending || status !== "ready"}
+                disabled={branchDisabled}
                 onClick={() => {
-                  createBranch.mutate({ messageId: message.id });
+                  onBranchFromMessage(message.id);
                 }}
               >
                 <GitBranchIcon className="size-3.5" />

@@ -14,9 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   useBranches,
-  useDeleteBranch,
   useRenameBranch,
-  useSwitchBranch,
 } from "@/features/conversation/hooks/use-branches";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +22,9 @@ type BranchSwitcherProps = {
   conversationId: string;
   activeBranchId: string | null;
   className?: string;
+  disabled?: boolean;
+  onSwitchBranch: (branchId: string) => void;
+  onDeleteBranch: (branchId: string) => void;
 };
 
 /**
@@ -33,11 +34,12 @@ export function BranchSwitcher({
   conversationId,
   activeBranchId,
   className,
+  disabled = false,
+  onSwitchBranch,
+  onDeleteBranch,
 }: BranchSwitcherProps) {
   const { data: branches = [], isLoading } = useBranches(conversationId);
-  const switchBranch = useSwitchBranch(conversationId);
   const renameBranch = useRenameBranch(conversationId);
-  const deleteBranch = useDeleteBranch(conversationId);
 
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
@@ -72,7 +74,7 @@ export function BranchSwitcher({
             variant="outline"
             size="sm"
             className={cn("h-8 gap-1.5 text-xs", className)}
-            disabled={isLoading || branches.length === 0}
+            disabled={disabled || isLoading || branches.length === 0}
           />
         }
       >
@@ -123,9 +125,10 @@ export function BranchSwitcher({
               <DropdownMenuItem
                 key={branch.id}
                 className="group flex items-center gap-2"
+                disabled={disabled}
                 onClick={() => {
                   if (!isActive) {
-                    switchBranch.mutate(branch.id);
+                    onSwitchBranch(branch.id);
                   }
                 }}
               >
@@ -161,7 +164,7 @@ export function BranchSwitcher({
                       onClick={(event) => {
                         event.preventDefault();
                         event.stopPropagation();
-                        deleteBranch.mutate(branch.id);
+                        onDeleteBranch(branch.id);
                       }}
                     >
                       <Trash2Icon className="size-3" />

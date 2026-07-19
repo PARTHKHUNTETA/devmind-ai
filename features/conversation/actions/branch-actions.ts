@@ -1,9 +1,11 @@
 "use server";
 
 import { resolvePath } from "@/features/ai/utils/message-tree";
+import { loadChatMessages } from "@/features/ai/actions/chat-store";
 import { requireUser } from "@/features/auth/action/require-user";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import type { UIMessage } from "ai";
 
 /** Shape returned for branch switcher UI. */
 export type BranchListItem = {
@@ -99,7 +101,7 @@ export async function createBranchFromMessage(
   conversationId: string,
   messageId: string,
   name?: string
-) {
+): Promise<{ branch: BranchListItem; messages: UIMessage[] }> {
   const user = await requireUser();
   await assertOwnsConversation(conversationId, user.id);
 
@@ -137,12 +139,20 @@ export async function createBranchFromMessage(
     return created;
   });
 
+  const messages = await loadChatMessages(conversationId, branch.id);
+
   revalidatePath(`/c/${conversationId}`);
-  return toBranchListItem(branch, branch.id);
+  return {
+    branch: toBranchListItem(branch, branch.id),
+    messages,
+  };
 }
 
 /** Switches the conversation's active branch. */
-export async function switchBranch(conversationId: string, branchId: string) {
+export async function switchBranch(
+  conversationId: string,
+  branchId: string
+): Promise<{ branch: BranchListItem; messages: UIMessage[] }> {
   const user = await requireUser();
   await assertOwnsConversation(conversationId, user.id);
 
@@ -159,8 +169,13 @@ export async function switchBranch(conversationId: string, branchId: string) {
     data: { activeBranchId: branchId },
   });
 
+  const messages = await loadChatMessages(conversationId, branchId);
+
   revalidatePath(`/c/${conversationId}`);
-  return toBranchListItem(branch, branchId);
+  return {
+    branch: toBranchListItem(branch, branchId),
+    messages,
+  };
 }
 
 /** Renames a branch. */
@@ -307,9 +322,12 @@ export async function deleteBranch(branchId: string) {
 
   revalidatePath(`/c/${conversationId}`);
 
+  const pathMessages = await loadChatMessages(conversationId, fallback.id);
+
   return {
     id: branchId,
     conversationId,
     activeBranchId: fallback.id,
+    messages: pathMessages,
   };
 }
