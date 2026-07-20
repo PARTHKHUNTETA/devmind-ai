@@ -1,4 +1,4 @@
-import { MessageSquareIcon } from "lucide-react";
+import { SparklesIcon } from "lucide-react";
 
 import {
   Empty,
@@ -11,17 +11,21 @@ import {
 /** Empty-state placeholder shown before the first message is sent. */
 export function ChatEmpty() {
   return (
-    <div className="flex flex-1 items-center justify-center px-4">
-      <Empty className="border-0">
+    <div className="chat-canvas flex flex-1 items-center justify-center px-4">
+      <Empty className="max-w-md border-0">
         <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <MessageSquareIcon />
+          <EmptyMedia
+            variant="icon"
+            className="size-14 rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/20"
+          >
+            <SparklesIcon className="size-6" />
           </EmptyMedia>
-          <EmptyTitle className="text-2xl tracking-tight">
+          <EmptyTitle className="text-2xl font-semibold tracking-tight">
             How can I help you today?
           </EmptyTitle>
-          <EmptyDescription>
-            Ask anything — replies stream in real time.
+          <EmptyDescription className="text-pretty text-[15px] leading-relaxed">
+            Ask anything — Devmind can search the web when it needs fresh
+            information, and you can branch from any reply.
           </EmptyDescription>
         </EmptyHeader>
       </Empty>

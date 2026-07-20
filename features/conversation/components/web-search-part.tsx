@@ -64,15 +64,18 @@ export function WebSearchPart({ part }: WebSearchPartProps) {
     <Collapsible open={open} onOpenChange={setOpen}>
       <div
         className={cn(
-          "rounded-lg border bg-muted/40 px-3 py-2 text-sm",
+          "overflow-hidden rounded-xl border border-border/70 bg-muted/30 px-3 py-2.5 text-sm shadow-sm",
+          isLoading && "border-primary/25 bg-primary/5",
           isError && "border-destructive/40 bg-destructive/5"
         )}
       >
-        <CollapsibleTrigger className="flex w-full items-center gap-2 text-left">
+        <CollapsibleTrigger className="flex w-full items-center gap-2.5 text-left">
           {isLoading ? (
-            <Loader2Icon className="size-3.5 shrink-0 animate-spin text-muted-foreground" />
+            <Loader2Icon className="size-3.5 shrink-0 animate-spin text-primary" />
           ) : (
-            <GlobeIcon className="size-3.5 shrink-0 text-muted-foreground" />
+            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-background/80 ring-1 ring-border/60">
+              <GlobeIcon className="size-3.5 text-muted-foreground" />
+            </span>
           )}
           <span className="min-w-0 flex-1 truncate text-muted-foreground">
             {isLoading
@@ -98,7 +101,7 @@ export function WebSearchPart({ part }: WebSearchPartProps) {
           )}
         </CollapsibleTrigger>
 
-        <CollapsibleContent className="pt-2">
+        <CollapsibleContent className="pt-2.5">
           {isError ? (
             <p className="text-xs text-destructive">
               {part.errorText || "Something went wrong while searching."}
@@ -113,7 +116,7 @@ export function WebSearchPart({ part }: WebSearchPartProps) {
                     href={source.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block truncate text-xs text-foreground underline-offset-2 hover:underline"
+                    className="block truncate rounded-md px-1.5 py-1 text-xs text-foreground transition-colors hover:bg-background/70 hover:underline hover:underline-offset-2"
                   >
                     {source.title || source.url}
                   </a>

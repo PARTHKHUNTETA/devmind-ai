@@ -39,8 +39,8 @@ export type MessageProps = HTMLAttributes<HTMLDivElement> & {
 export const Message = ({ className, from, ...props }: MessageProps) => (
   <div
     className={cn(
-      "group flex w-full max-w-[95%] flex-col gap-2",
-      from === "user" ? "is-user ml-auto justify-end" : "is-assistant",
+      "group flex w-full flex-col gap-2",
+      from === "user" ? "is-user items-end" : "is-assistant items-start",
       className
     )}
     {...props}
@@ -58,9 +58,9 @@ export const MessageContent = ({
 }: MessageContentProps) => (
   <div
     className={cn(
-      "is-user:dark flex w-fit min-w-0 max-w-full flex-col gap-2 overflow-hidden text-sm",
-      "group-[.is-user]:ml-auto group-[.is-user]:rounded-lg group-[.is-user]:bg-secondary group-[.is-user]:px-4 group-[.is-user]:py-3 group-[.is-user]:text-foreground",
-      "group-[.is-assistant]:text-foreground",
+      "flex w-fit min-w-0 max-w-[min(100%,42rem)] flex-col gap-2.5 overflow-hidden text-[15px] leading-relaxed",
+      "group-[.is-user]:rounded-2xl group-[.is-user]:rounded-br-md group-[.is-user]:bg-primary group-[.is-user]:px-4 group-[.is-user]:py-2.5 group-[.is-user]:text-primary-foreground group-[.is-user]:shadow-sm",
+      "group-[.is-assistant]:w-full group-[.is-assistant]:max-w-none group-[.is-assistant]:rounded-2xl group-[.is-assistant]:rounded-tl-md group-[.is-assistant]:bg-card/80 group-[.is-assistant]:px-4 group-[.is-assistant]:py-3.5 group-[.is-assistant]:text-foreground group-[.is-assistant]:ring-1 group-[.is-assistant]:ring-border/70 group-[.is-assistant]:shadow-sm group-[.is-assistant]:backdrop-blur-sm",
       className
     )}
     {...props}
@@ -360,7 +360,15 @@ export const MessageResponse = memo(
   ({ className, ...props }: MessageResponseProps) => (
     <Streamdown
       className={cn(
-        "size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
+        "size-full text-[15px] leading-7 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
+        "[&_a]:text-primary [&_a]:underline-offset-2 hover:[&_a]:underline",
+        "[&_code]:rounded-md [&_code]:bg-muted/80 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[0.9em]",
+        "[&_pre]:rounded-xl [&_pre]:border [&_pre]:border-border/60 [&_pre]:bg-muted/40",
+        "[&_:is(ul,ol)]:my-2 [&_li]:leading-relaxed",
+        "[&_h1]:mb-2 [&_h1]:mt-4 [&_h1]:text-lg [&_h1]:font-semibold",
+        "[&_h2]:mb-2 [&_h2]:mt-4 [&_h2]:text-base [&_h2]:font-semibold",
+        "[&_h3]:mb-1.5 [&_h3]:mt-3 [&_h3]:text-[15px] [&_h3]:font-semibold",
+        "group-[.is-user]:[&_a]:text-primary-foreground group-[.is-user]:[&_code]:bg-primary-foreground/15",
         className
       )}
       plugins={streamdownPlugins}

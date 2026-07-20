@@ -192,11 +192,18 @@ function ConversationChat({
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col">
-      <header className="flex h-14 shrink-0 items-center gap-2 border-b px-3">
-        <SidebarTrigger />
+    <div className="chat-canvas relative flex h-full min-h-0 flex-1 flex-col">
+      <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b border-border/60 bg-background/75 px-3 backdrop-blur-xl supports-backdrop-filter:bg-background/55 md:px-4">
+        <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
         <Separator orientation="vertical" className="mx-1 h-4" />
-        <h1 className="min-w-0 flex-1 truncate text-sm font-medium">{title}</h1>
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-sm font-semibold tracking-tight">
+            {title}
+          </h1>
+          <p className="truncate text-[11px] text-muted-foreground">
+            Conversation · branch-aware chat
+          </p>
+        </div>
         <BranchSwitcher
           conversationId={conversationId}
           activeBranchId={activeBranchId}
@@ -217,13 +224,15 @@ function ConversationChat({
         />
       )}
 
-      <ChatComposer
-        onSend={(text) => {
-          void sendMessage({ text });
-        }}
-        isSending={status !== "ready" || branchPending}
-        autoFocus
-      />
+      <div className="relative shrink-0 border-t border-border/40 bg-linear-to-t from-background via-background/95 to-transparent pt-2">
+        <ChatComposer
+          onSend={(text) => {
+            void sendMessage({ text });
+          }}
+          isSending={status !== "ready" || branchPending}
+          autoFocus
+        />
+      </div>
     </div>
   );
 }

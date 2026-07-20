@@ -129,3 +129,19 @@
     @apply font-sans;
   }
 }
+
+/* Soft ambient canvas for chat surfaces — uses existing primary token */
+.chat-canvas {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(
+      1200px 480px at 50% -10%,
+      color-mix(in oklab, var(--primary) 14%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      800px 360px at 100% 100%,
+      color-mix(in oklab, var(--primary) 6%, transparent),
+      transparent 55%
+    );
+}

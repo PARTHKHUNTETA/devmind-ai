@@ -73,7 +73,10 @@ export function BranchSwitcher({
             type="button"
             variant="outline"
             size="sm"
-            className={cn("h-8 gap-1.5 text-xs", className)}
+            className={cn(
+              "h-8 gap-1.5 rounded-full border-border/70 bg-background/70 text-xs shadow-sm backdrop-blur-sm",
+              className
+            )}
             disabled={disabled || isLoading || branches.length === 0}
           />
         }
